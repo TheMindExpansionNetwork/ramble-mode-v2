@@ -33,7 +33,7 @@ MODELS = {
     "large": {"size": "large", "speed": "slowest", "accuracy": "best", "vram": "10GB"},
 }
 
-DEFAULT_MODEL = "base"
+DEFAULT_MODEL = "tiny"
 
 
 @app.function(
