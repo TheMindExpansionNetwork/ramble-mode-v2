@@ -14,24 +14,24 @@ image = (
     .pip_install(
         "fastapi",
         "python-multipart",
-        "openai-whisper",  # OpenAI's Whisper (local, no API needed)
+        "openai-whisper",
         "torch>=2.0.0",
         "numpy",
-        "python-docx",  # For transcript export
+        "python-docx",
     )
 )
 
 app = App("ramble-mode-v2")
 
 # Model configuration - using base model for speed
-MODEL_SIZE = "base"  # Options: tiny, base, small, medium, large
+MODEL_SIZE = "base"
 
 
 @app.function(
     image=image,
-    gpu="T4",  # Fast and cheap for Whisper
-    memory=8192,  # 8GB is plenty for base model
-    min_containers=1,  # Keep warm for fast response
+    gpu="T4",
+    memory=8192,
+    min_containers=0,
     timeout=300,
 )
 @asgi_app(label="api")
@@ -43,9 +43,8 @@ def fastapi_app():
     import subprocess
     import os
     from fastapi import FastAPI, File, UploadFile, Form
-    from fastapi.responses import JSONResponse, FileResponse
+    from fastapi.responses import JSONResponse
     from typing import Optional
-    import json
     
     web_app = FastAPI(title="Ramble Mode V2", version="2.0.0")
     
@@ -58,19 +57,11 @@ def fastapi_app():
     @web_app.post("/transcribe")
     async def transcribe(
         file: UploadFile = File(...),
-        language: Optional[str] = Form(None),  # Auto-detect if not provided
-        task: str = Form("transcribe"),  # or "translate" to English
-        speaker_detection: bool = Form(True)  # Try to detect speakers
+        language: Optional[str] = Form(None),
+        task: str = Form("transcribe"),
+        speaker_detection: bool = Form(True)
     ):
-        """
-        Transcribe uploaded audio file.
-        
-        Args:
-            file: Audio file (ogg, mp3, wav, m4a, etc.)
-            language: Language code (e.g., 'en', 'es') or auto-detect
-            task: 'transcribe' or 'translate' (to English)
-            speaker_detection: Attempt to identify different speakers
-        """
+        """Transcribe uploaded audio file."""
         
         # Read uploaded file
         audio_bytes = await file.read()
@@ -97,7 +88,7 @@ def fastapi_app():
                 }, status_code=400)
             
             # Transcribe with Whisper
-            print(f"🎯 Transcribing {len(audio_bytes)} bytes...")
+            print(f"🎯 Transcribing {len(audio_bytes)} bytes on {device}...")
             
             options = {
                 "task": task,
